@@ -1,37 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart'; // Add this import
-
-class ThemeNotifier extends ChangeNotifier {
-  ThemeData _themeData;
-
-  ThemeNotifier(this._themeData);
-
-  ThemeData getTheme() => _themeData;
-
-  void setDarkMode() {
-    _themeData = ThemeData.dark().copyWith(
-      primaryColor: Colors.blueGrey,
-      hintColor: Colors.blueAccent,
-      textTheme: TextTheme(
-        displayLarge: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
-        bodyLarge: TextStyle(color: Colors.white70, fontSize: 16),
-      ),
-    );
-    notifyListeners();
-  }
-
-  void setLightMode() {
-    _themeData = ThemeData.light().copyWith(
-      primaryColor: Colors.blue,
-      hintColor: Colors.blueAccent,
-      textTheme: TextTheme(
-        displayLarge: TextStyle(color: Colors.black, fontSize: 32, fontWeight: FontWeight.bold),
-        bodyLarge: TextStyle(color: Colors.black87, fontSize: 16),
-      ),
-    );
-    notifyListeners();
-  }
-}
+import 'package:provider/provider.dart';
 
 void main() {
   runApp(
@@ -42,13 +10,79 @@ void main() {
   );
 }
 
+class ThemeNotifier extends ChangeNotifier {
+  ThemeData _themeData;
+
+  ThemeNotifier(this._themeData);
+
+  ThemeData getTheme() => _themeData;
+
+  void setDarkMode() {
+    _themeData = ThemeData.dark().copyWith(
+      primaryColor: Colors.black,
+      hintColor: Colors.greenAccent, // Neon green
+      scaffoldBackgroundColor: Colors.black,
+      cardColor: Colors.grey[900],
+      buttonTheme: ButtonThemeData(
+        buttonColor: Colors.greenAccent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30),
+        ),
+      ),
+      textTheme: const TextTheme(
+        headlineSmall: TextStyle(
+          color: Colors.white,
+          fontSize: 32,
+          fontWeight: FontWeight.bold,
+          fontFamily: 'San Francisco', 
+        ),
+        bodyLarge: TextStyle(
+          color: Colors.white70,
+          fontSize: 16,
+          fontFamily: 'San Francisco', 
+        ),
+      ),
+    );
+    notifyListeners();
+  }
+
+  void setLightMode() {
+    _themeData = ThemeData.light().copyWith(
+      primaryColor: Colors.black,
+      hintColor: Colors.greenAccent,
+      scaffoldBackgroundColor: Colors.white,
+      cardColor: Colors.white,
+      buttonTheme: ButtonThemeData(
+        buttonColor: Colors.greenAccent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30),
+        ),
+      ),
+      textTheme: const TextTheme(
+        headlineSmall: TextStyle(
+          color: Colors.black,
+          fontSize: 32,
+          fontWeight: FontWeight.bold,
+          fontFamily: 'San Francisco',
+        ),
+        bodyLarge: TextStyle(
+          color: Colors.black87,
+          fontSize: 16,
+          fontFamily: 'San Francisco',
+        ),
+      ),
+    );
+    notifyListeners();
+  }
+}
+
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<ThemeNotifier>(
       builder: (context, themeNotifier, child) {
         return MaterialApp(
-          title: 'New app',
+          title: 'LOGIN App',
           theme: themeNotifier.getTheme(),
           initialRoute: '/login',
           routes: {
@@ -61,6 +95,7 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -72,7 +107,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   String? _email, _password;
 
-  // Hardcoded credentials for demonstration
   final String _correctEmail = "something@example.com";
   final String _correctPass = "123456";
 
@@ -81,99 +115,105 @@ class _LoginScreenState extends State<LoginScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
+      appBar: AppBar(
+        title: Text("LOGIN", style: theme.textTheme.headlineSmall),
+        backgroundColor: theme.primaryColor,
+        titleTextStyle: const TextStyle(fontWeight:FontWeight.bold),
+      ),
       body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                "Welcome Back",
-                style: theme.textTheme.displayLarge,
-              ),
-              const SizedBox(height: 30),
-              Card(
-                elevation: 5,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15.0),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      children: [
-                        TextFormField(
-                          decoration: InputDecoration(
-                            labelText: "Username",
-                            border: OutlineInputBorder(),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your username';
-                            }
-                            return null;
-                          },
-                          onSaved: (value) {
-                            _email = value;
-                          },
-                        ),
-                        const SizedBox(height: 20),
-                        TextFormField(
-                          decoration: InputDecoration(
-                            labelText: "Password",
-                            border: OutlineInputBorder(),
-                          ),
-                          obscureText: true,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your password';
-                            }
-                            return null;
-                          },
-                          onSaved: (value) {
-                            _password = value;
-                          },
-                        ),
-                        const SizedBox(height: 20),
-                        ElevatedButton(
-                          onPressed: () {
-                            if (_formKey.currentState!.validate()) {
-                              _formKey.currentState!.save();
-                              // Check if the credentials match the hardcoded values
-                              if (_email == _correctEmail && _password == _correctPass) {
-                                Navigator.pushReplacementNamed(context, '/home');
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Invalid email or password')),
-                                );
-                              }
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 50,
-                              vertical: 15,
-                            ),
-                          ),
-                          child: const Text("Log in"),
-                        ),
-                      ],
-                    ),
+        child: Card(
+          elevation: 8,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
+          color: theme.cardColor,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0), 
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    "Welcome Back",
+                    style: theme.textTheme.headlineSmall!.copyWith(fontWeight: FontWeight.bold),
                   ),
-                ),
+                  const SizedBox(height: 30),
+                  TextFormField(
+                    decoration: InputDecoration(
+                      labelText: "Username",
+                      hintText: "e.g., $_correctEmail",
+                      border: const OutlineInputBorder(),
+                      filled: true,
+                      fillColor: const Color.fromARGB(255, 43, 43, 43),
+                      hintStyle: const TextStyle(fontWeight: FontWeight.bold,color: Colors.white54),
+                    ),
+                    style: const TextStyle(color: Colors.white),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your username';
+                      }
+                      return null;
+                    },
+                    onSaved: (value) {
+                      _email = value;
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  TextFormField(
+                    decoration: InputDecoration(
+                      labelText: "Password",
+                      hintText: "e.g., $_correctPass",
+                      border: const OutlineInputBorder(),
+                      filled: true,
+                      fillColor: const Color.fromARGB(255, 32, 32, 32)  ,  
+                      hintStyle: const TextStyle(color: Colors.white54),
+                    ),
+                    obscureText: true,
+                    style: const TextStyle(color: Colors.white),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your password';
+                      }
+                      return null;
+                    },
+                    onSaved: (value) {
+                      _password = value;
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        _formKey.currentState!.save();
+                        if (_email == _correctEmail && _password == _correctPass) {
+                          Navigator.pushReplacementNamed(context, '/home');
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Invalid email or password')),
+                          );
+                        }
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      backgroundColor: Colors.greenAccent, // Neon green buttons
+                      padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                    ),
+                    child: const Text("LOGIN IN", style: TextStyle(fontWeight:FontWeight.bold,color: Colors.black)),
+                  ),
+                  const SizedBox(height: 10),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pushReplacementNamed(context, '/signup');
+                    },
+                    child: const Text("New user? Sign Up", style: TextStyle(color: Colors.greenAccent)),
+                  ),
+                ],
               ),
-              const SizedBox(height: 10),
-              TextButton(
-                onPressed: () {
-                  Navigator.pushReplacementNamed(context, '/signup');
-                },
-                child: const Text("New user? Sign Up"),
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -196,100 +236,105 @@ class _SignupScreenState extends State<SignupScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
+      appBar: AppBar(
+        title: Text("SIGN UP", style: theme.textTheme.headlineSmall),
+        backgroundColor: theme.primaryColor,
+      ),
       body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                "Sign up",
-                style: theme.textTheme.displayLarge,
-              ),
-              const SizedBox(height: 30),
-              Card(
-                elevation: 5,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15.0),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      children: [
-                        TextFormField(
-                          decoration: InputDecoration(
-                            labelText: "First name",
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        TextFormField(
-                          decoration: InputDecoration(
-                            labelText: "Last name",
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        TextFormField(
-                          decoration: InputDecoration(
-                            labelText: "Email",
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        TextFormField(
-                          decoration: InputDecoration(
-                            labelText: "Password",
-                            border: OutlineInputBorder(),
-                          ),
-                          obscureText: true,
-                        ),
-                        const SizedBox(height: 10),
-                        TextFormField(
-                          decoration: InputDecoration(
-                            labelText: "Confirm password",
-                            border: OutlineInputBorder(),
-                          ),
-                          obscureText: true,
-                        ),
-                        const SizedBox(height: 20),
-                        ElevatedButton(
-                          onPressed: () {
-                            if (_formKey.currentState!.validate()) {
-                              Navigator.pushReplacementNamed(context, '/home');
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 50,
-                              vertical: 15,
-                            ),
-                          ),
-                          child: const Text("Sign up"),
-                        ),
-                      ],
+        child: Card(
+          elevation: 8,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
+          color: theme.cardColor,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    "Sign up",
+                    style: theme.textTheme.headlineSmall!.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 30),
+                  TextFormField(
+                    decoration: InputDecoration(
+                      labelText: "Full Name",
+                      border: const OutlineInputBorder(),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                    ),
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                  const SizedBox(height: 10),
+                  TextFormField(
+                    decoration: InputDecoration(
+                      labelText: "Email",
+                      border: const OutlineInputBorder(),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                    ),
+                    style: const TextStyle(color: Colors.white,fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 10),
+                  TextFormField(
+                    decoration: const InputDecoration(
+                      labelText: "Password",
+                      border: OutlineInputBorder(),
+                      filled: true,
+                      fillColor: Color.fromARGB(255, 66, 66, 66),
+                    ),
+                    obscureText: true,
+                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 10),
+                  TextFormField(
+                    decoration: const InputDecoration(
+                      labelText: "Confirm password",
+                      border: OutlineInputBorder(),
+                      filled: true,
+                      fillColor: Color.fromARGB(255, 66, 66, 66),
+                    ),
+                    obscureText: true,
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        Navigator.pushReplacementNamed(context, '/home');
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      backgroundColor: Colors.greenAccent, 
+                      padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                    ),
+                    child: const Text(
+                      "SIGN UP",
+                      style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
                     ),
                   ),
-                ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pushReplacementNamed(context, '/login');
+                    },
+                    child: const Text("Already have an account? LOGIN", style: TextStyle(color: Colors.greenAccent)),
+                  ),
+                ],
               ),
-              TextButton(
-                onPressed: () {
-                  Navigator.pushReplacementNamed(context, '/login');
-                },
-                child: const Text("Already have an account? Login"),
-              ),
-            ],
+            ),
           ),
         ),
       ),
     );
   }
 }
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -312,14 +357,12 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          "Home",
-          style: theme.textTheme.displayLarge,
-        ),
+        title: Text("HOME", style: theme.textTheme.headlineSmall),
+        backgroundColor: theme.primaryColor,
         actions: [
           IconButton(
             icon: Icon(
-              theme.getTheme() == ThemeData.dark() ? Icons.wb_sunny : Icons.nightlight_round,
+              theme.brightness == Brightness.dark ? Icons.wb_sunny : Icons.nightlight_round,
             ),
             onPressed: () {
               final themeNotifier = Provider.of<ThemeNotifier>(context, listen: false);
@@ -335,25 +378,21 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           controller: _tabController,
           tabs: const [
             Tab(text: 'For You'),
-            Tab(text: 'Top Charts'),
-            Tab(text: 'Podcasts'),
-            Tab(text: 'Videos'),
+            Tab(text: 'Trending'),
+            Tab(text: 'Favorites'),
+            Tab(text: 'Settings'),
           ],
         ),
       ),
       body: TabBarView(
         controller: _tabController,
         children: [
-          Center(child: Text('For You Content', style: theme.textTheme.bodyLarge)),
-          Center(child: Text('Top Charts Content', style: theme.textTheme.bodyLarge)),
-          Center(child: Text('Podcasts Content', style: theme.textTheme.bodyLarge)),
-          Center(child: Text('Videos Content', style: theme.textTheme.bodyLarge)),
+          Center(child: Text("For You", style: theme.textTheme.bodyLarge)),
+          Center(child: Text("Trending", style: theme.textTheme.bodyLarge)),
+          Center(child: Text("Favorites", style: theme.textTheme.bodyLarge)),
+          Center(child: Text("Settings", style: theme.textTheme.bodyLarge)),
         ],
       ),
     );
   }
-}
-
-extension on ThemeData {
-  getTheme() {}
 }
